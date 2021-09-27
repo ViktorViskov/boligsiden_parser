@@ -13,7 +13,7 @@ class Parser:
     def __init__(self, link:str):
         
         # init modules
-        self.DB = Mysql_Connect("192.168.111.37", "root", "dbnmjr031193", "boligsiden")
+        self.DB = Mysql_Connect("10.0.0.2", "root", "dbnmjr031193", "boligsiden")
         self.RQ = RQ()
 
         # load data

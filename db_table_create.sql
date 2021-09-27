@@ -15,5 +15,5 @@ CREATE TABLE houses (
     price_per_meter int,
     price_tax int,
     price_changes varchar(16),
-    first_payment int,
+    first_payment int
 );
