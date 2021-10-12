@@ -10,20 +10,45 @@ from core.request import RQ
 class Parser:
 
     # constructor
-    def __init__(self, link:str):
+    def __init__(self, start_from:int, amount_items:int):
         
         # init modules
-        self.DB = Mysql_Connect("10.0.0.2", "root", "dbnmjr031193", "boligsiden")
+        self.DB = Mysql_Connect("127.0.0.1", "root", "dbnmjr031193", "boligsiden")
         self.RQ = RQ()
 
-        # load data
-        self.json = json.loads(self.RQ.Load(link))
+        # variable for page number
+        self.page_number = start_from
 
-        # buffered data
+        # variable for items amount 
+        self.amount_items = amount_items
+
+        # Data to process (response from server)
+        self.data_to_process = []
+
+        # buffered data (to db)
         self.sql_requests = []
 
+        # loop for load pages
+        while True:
+
+            # Main app link for download data
+            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=1b83e5be6d0f49b184ad507ada7ea96e" % (self.page_number, self.amount_items)
+
+            # load data
+            self.json = json.loads(self.RQ.Load(link))
+
+            # check for amount af houses in response
+            if len(self.json["result"]["items"]) > 0:
+                self.data_to_process += self.json["result"]["items"]
+                #print("Loaded page %d | Length %d" % (self.page_number, len(self.json["result"]["items"])))
+                self.page_number += 1
+
+            else:
+                break
+
+
         # process all data
-        self.Process_All(self.json["result"]["items"])
+        self.Process_All(self.data_to_process)
 
         # send to db
         self.Send_To_Db(self.sql_requests)
