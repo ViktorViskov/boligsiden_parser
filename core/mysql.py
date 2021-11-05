@@ -40,6 +40,5 @@ class Mysql_Connect:
     def IO(self, sql_command):
 
         self.cursor.execute(sql_command)
-        self.connection.commit()
 
         return self.cursor.fetchall()

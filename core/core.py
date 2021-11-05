@@ -13,7 +13,7 @@ class Parser:
     def __init__(self, start_from:int, amount_items:int):
         
         # init modules
-        self.DB = Mysql_Connect("127.0.0.1", "root", "dbnmjr031193", "boligsiden")
+        self.DB = Mysql_Connect("db", "root", "dbnmjr031193", "boligsiden")
         self.RQ = RQ()
 
         # variable for page number
@@ -27,6 +27,7 @@ class Parser:
 
         # buffered data (to db)
         self.sql_requests = []
+        self.data_storage = list(map(lambda some_link: some_link[0], self.DB.IO("SELECT link FROM houses")))
 
         # loop for load pages
         while True:
@@ -84,9 +85,9 @@ class Parser:
 
         # create sql request
         sql_request = "INSERT INTO houses VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (link, house_photo, street, post_index,city, sell_period, build_year, energy_class, house_area, terittory_area,house_type, amount_rooms, price, price_per_meter, price_tax, price_changes, first_payment)
-        
+
         # add data to buffer
-        self.sql_requests.append(sql_request)
+        self.sql_requests.append([link, sell_period, price, sql_request])
 
     # Getting string from dict
     def Get_Dict_String(self,key, checked_dict):
@@ -122,13 +123,19 @@ class Parser:
     # update data in db
     def Send_To_Db(self, data_dict):
         # delete all old data from mysql database
-        self.DB.I("DELETE FROM houses")
+        
+        # self.DB.I("DELETE FROM houses")
 
         # write all records to db
         for item in data_dict:
+            # load data from db
+            if item[0] in self.data_storage:
+                print("Link exist")
+                continue
 
-            # requests to db
-            self.DB.I(item)
+            else:
+                # requests to db
+                self.DB.I(item[3])
 
 
 
