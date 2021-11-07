@@ -140,7 +140,7 @@ class Parser:
                         self.DB.I("UPDATE houses SET sell_period = '%d' WHERE link = '%s'" % (item[2], item[0]))
                         
                     # check for price and if exist contiue
-                    if item[1] != storage_item[1]:
+                    if item[1] == storage_item[1]:
                         break
                     # update
                     else:
