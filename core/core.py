@@ -33,7 +33,7 @@ class Parser:
         while True:
 
             # Main app link for download data
-            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=be399cf9cb1f4109aee64bd45f649156" % (self.page_number, self.amount_items)
+            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=389a9ba9396842fc90b9792600abb967" % (self.page_number, self.amount_items)
 
             # load data
             self.json = json.loads(self.RQ.Load(link))
