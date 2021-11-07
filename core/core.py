@@ -27,13 +27,13 @@ class Parser:
 
         # buffered data (to db)
         self.sql_requests = []
-        self.data_storage = list(map(lambda some_link: some_link[0], self.DB.IO("SELECT link FROM houses")))
+        self.data_storage = self.DB.IO("SELECT link, price FROM houses")
 
         # loop for load pages
         while True:
 
             # Main app link for download data
-            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=1b83e5be6d0f49b184ad507ada7ea96e" % (self.page_number, self.amount_items)
+            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=be399cf9cb1f4109aee64bd45f649156" % (self.page_number, self.amount_items)
 
             # load data
             self.json = json.loads(self.RQ.Load(link))
@@ -51,7 +51,7 @@ class Parser:
         # process all data
         self.Process_All(self.data_to_process)
 
-        # send to db
+        # Update data in db
         self.Send_To_Db(self.sql_requests)
     
 
@@ -87,7 +87,7 @@ class Parser:
         sql_request = "INSERT INTO houses VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (link, house_photo, street, post_index,city, sell_period, build_year, energy_class, house_area, terittory_area,house_type, amount_rooms, price, price_per_meter, price_tax, price_changes, first_payment)
 
         # add data to buffer
-        self.sql_requests.append([link, sell_period, price, sql_request])
+        self.sql_requests.append([link, price, sql_request])
 
     # Getting string from dict
     def Get_Dict_String(self,key, checked_dict):
@@ -122,22 +122,47 @@ class Parser:
 
     # update data in db
     def Send_To_Db(self, data_dict):
-        # delete all old data from mysql database
-        
-        # self.DB.I("DELETE FROM houses")
 
         # write all records to db
         for item in data_dict:
+
+            # main variable for deleting controll
+            not_exist = True
+
             # load data from db
-            if item[0] in self.data_storage:
-                print("Link exist")
-                continue
+            for storage_item in self.data_storage:
+                if item[0] in storage_item:
+                    # change main controll variable
+                    not_exist = False
 
-            else:
+                    # check for price and if exist contiue
+                    if item[1] in storage_item:
+                        break
+                    # update
+                    else:
+                        self.DB.I("UPDATE houses SET price = '%d' WHERE link = '%s'" % (item[1], item[0]))
+                        break
+                
+            # item not exist
+            if not_exist:
                 # requests to db
-                self.DB.I(item[3])
+                self.DB.I(item[2])
 
+        # delete houses that not exist
+        for storage_item in self.data_storage:
 
+            # main variable for deleting controll
+            not_exist = True
 
+            # second loop for searching
+            for item in data_dict:
+                if storage_item[0] in item:
+                    # item exist
+                    not_exist = False
+                    break
+            
+            # if item not exist, delete
+            if not_exist:
+                self.DB.I("DELETE FROM houses WHERE link = '%s'" % (storage_item[0]))
 
 
