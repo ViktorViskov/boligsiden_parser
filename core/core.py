@@ -115,7 +115,7 @@ class Parser:
                 preprocess_string = checked_dict[key].replace(".", "")
                 result = int(preprocess_string)
             except:
-                print("Can not convert %s to int" % (checked_dict[key]))
+                pass
         
         # result
         return result
