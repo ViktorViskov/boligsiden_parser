@@ -33,7 +33,7 @@ class Parser:
         while True:
 
             # Main app link for download data
-            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=be399cf9cb1f4109aee64bd45f649156" % (self.page_number, self.amount_items)
+            link = "https://www.boligsiden.dk/address/api/addressresultproperty/getdata?p=%d&i=%d&s=12&sd=false&searchId=389a9ba9396842fc90b9792600abb967" % (self.page_number, self.amount_items)
 
             # load data
             self.json = json.loads(self.RQ.Load(link))
@@ -140,7 +140,7 @@ class Parser:
                         self.DB.I("UPDATE houses SET sell_period = '%d' WHERE link = '%s'" % (item[2], item[0]))
                         
                     # check for price and if exist contiue
-                    if item[1] != storage_item[1]:
+                    if item[1] == storage_item[1]:
                         break
                     # update
                     else:
