@@ -27,7 +27,7 @@ class Parser:
 
         # buffered data (to db)
         self.sql_requests = []
-        self.data_storage = self.DB.IO("SELECT link, price FROM houses")
+        self.data_storage = self.DB.IO("SELECT link, price, sell_period FROM houses")
 
         # loop for load pages
         while True:
@@ -87,7 +87,7 @@ class Parser:
         sql_request = "INSERT INTO houses VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (link, house_photo, street, post_index,city, sell_period, build_year, energy_class, house_area, terittory_area,house_type, amount_rooms, price, price_per_meter, price_tax, price_changes, first_payment)
 
         # add data to buffer
-        self.sql_requests.append([link, price, sql_request])
+        self.sql_requests.append([link, price, sell_period, sql_request])
 
     # Getting string from dict
     def Get_Dict_String(self,key, checked_dict):
@@ -131,12 +131,16 @@ class Parser:
 
             # load data from db
             for storage_item in self.data_storage:
-                if item[0] in storage_item:
+                if item[0] == storage_item[0]:
                     # change main controll variable
                     not_exist = False
 
+                    # update sell period
+                    if item[2] != storage_item[2]:
+                        self.DB.I("UPDATE houses SET sell_period = '%d' WHERE link = '%s'" % (item[2], item[0]))
+                        
                     # check for price and if exist contiue
-                    if item[1] in storage_item:
+                    if item[1] != storage_item[1]:
                         break
                     # update
                     else:
@@ -146,7 +150,7 @@ class Parser:
             # item not exist
             if not_exist:
                 # requests to db
-                self.DB.I(item[2])
+                self.DB.I(item[3])
 
         # delete houses that not exist
         for storage_item in self.data_storage:
